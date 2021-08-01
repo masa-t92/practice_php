@@ -2,9 +2,11 @@ FROM php:8.0-fpm
 COPY ./php.ini /usr/local/etc/php/
 RUN apt-get update \
    && apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev libonig-dev zip unzip \
-   && docker-php-ext-install pdo_mysql mysqli gd iconv exif \
-   && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-   && php -r "if (hash_file('sha384', 'composer-setup.php') === '756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
-   && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-   && php -r "unlink('composer-setup.php');" \
-RUN chmod -R 777 ../storage
+   && docker-php-ext-install pdo_mysql mysqli gd iconv exif
+
+# Composer install
+COPY --from=composer:2.0 /usr/bin/composer /usr/bin/composer
+
+# node install
+COPY --from=node:12.14 /usr/local/bin /usr/local/bin
+COPY --from=node:12.14 /usr/local/lib /usr/local/lib
